@@ -11,14 +11,14 @@ const gifStages = [
 
 const noMessages = [
     "No",
-    "Are you positive? 🤔",
-    "Pookie please... 🥺",
-    "If you say no, I will be really sad...",
-    "I will be very sad... 😢",
-    "Please??? 💔",
-    "Don't do this to me...",
-    "Last chance! 😭",
-    "You can't catch me anyway 😜"
+    "Are you sure? 💍",
+    "Think about our future... 🥺",
+    "If you say no, my heart will break...",
+    "But we're meant to be... 😢",
+    "Please say yes??? 💖",
+    "Don't do this to us...",
+    "Last chance for forever! 😭",
+    "You can't run away from destiny 😜"
 ]
 
 const yesTeasePokes = [
@@ -39,18 +39,35 @@ const yesBtn = document.getElementById('yes-btn')
 const noBtn = document.getElementById('no-btn')
 const music = document.getElementById('bg-music')
 
-// Autoplay: audio starts muted (bypasses browser policy), unmute immediately
-music.muted = true
+// Autoplay: attempt to play unmuted directly
 music.volume = 0.3
+music.muted = false
+
+// Function to unlock audio on first interaction
+const unlockAudio = () => {
+    if (!musicPlaying && music.paused) {
+        music.play().then(() => {
+            musicPlaying = true;
+            document.getElementById('music-toggle').textContent = '🔊';
+            document.removeEventListener('click', unlockAudio);
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('keydown', unlockAudio);
+        }).catch(() => {});
+    }
+};
+
+document.addEventListener('click', unlockAudio);
+document.addEventListener('touchstart', unlockAudio);
+document.addEventListener('keydown', unlockAudio);
+
+// Initial attempt to play
 music.play().then(() => {
-    music.muted = false
+    musicPlaying = true;
+    document.getElementById('music-toggle').textContent = '🔊';
 }).catch(() => {
-    // Fallback: unmute on first interaction
-    document.addEventListener('click', () => {
-        music.muted = false
-        music.play().catch(() => {})
-    }, { once: true })
-})
+    musicPlaying = false;
+    document.getElementById('music-toggle').textContent = '🔇';
+});
 
 function toggleMusic() {
     if (musicPlaying) {
@@ -73,7 +90,10 @@ function handleYesClick() {
         showTeaseMessage(msg)
         return
     }
-    window.location.href = 'yes.html'
+    document.getElementById('main-container').style.display = 'none';
+    document.getElementById('yes-container').style.display = 'block';
+    document.title = 'Yes! Forever! 💍';
+    launchConfetti();
 }
 
 function showTeaseMessage(msg) {
@@ -142,4 +162,42 @@ function runAway() {
     noBtn.style.left = `${randomX}px`
     noBtn.style.top = `${randomY}px`
     noBtn.style.zIndex = '50'
+}
+
+function launchConfetti() {
+    const colors = ['#ff69b4', '#ff1493', '#ff85a2', '#ffb3c1', '#ff0000', '#ff6347', '#fff', '#ffdf00']
+    const duration = 6000
+    const end = Date.now() + duration
+
+    // Initial big burst
+    confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { x: 0.5, y: 0.3 },
+        colors
+    })
+
+    // Continuous side cannons
+    const interval = setInterval(() => {
+        if (Date.now() > end) {
+            clearInterval(interval)
+            return
+        }
+
+        confetti({
+            particleCount: 40,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.6 },
+            colors
+        })
+
+        confetti({
+            particleCount: 40,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.6 },
+            colors
+        })
+    }, 300)
 }
